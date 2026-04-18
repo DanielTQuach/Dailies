@@ -14,8 +14,8 @@ const envSchema = z
       (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
       z.string().trim().url().optional()
     ),
-    CLERK_SECRET_KEY: z.string().trim().min(1).optional(),
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().trim().min(1).optional(),
+    CLERK_SECRET_KEY: z.string().trim().min(1),
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().trim().min(1),
   })
   .superRefine((data, ctx) => {
     // Vercel sets VERCEL_ENV=production for Production deployments.

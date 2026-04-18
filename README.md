@@ -27,6 +27,15 @@ Environment variables are validated at startup via `lib/env.ts` using `zod`.
 - In **development**, `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - On **Vercel Production** (`VERCEL_ENV=production`), `NEXT_PUBLIC_APP_URL` must be set to your real deployed URL (not the localhost default).
 
+## Authentication (Clerk)
+
+This app uses [Clerk](https://clerk.com/) for authentication.
+
+1. Create a Clerk application and copy **Publishable key** and **Secret key** into `.env.local` (and `.env` if you use Prisma CLI patterns from above).
+2. Sign-in and sign-up routes live at `/sign-in` and `/sign-up` (see `app/sign-in` / `app/sign-up`).
+
+`CLERK_SECRET_KEY` and `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` are **required** at build time because `lib/env.ts` validates them.
+
 ## Database (Prisma)
 
 Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`) for Next.js, and **also** put it in `.env` if you want Prisma CLI commands (`migrate`, `validate`, `generate` in some setups) to pick it up automatically—Prisma reads `.env` by default, not `.env.local`.
