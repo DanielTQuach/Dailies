@@ -26,11 +26,10 @@ export default async function GoalsPage() {
           </Link>
         </div>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Create goals and track them here. API routes live under{" "}
-          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-900">
-            /api/goals
-          </code>
-          .
+          Create goals, log progress, and review entries. APIs:{" "}
+          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-900">/api/goals</code>
+          ,{" "}
+          <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-900">/api/goals/[goalId]/entries</code>.
         </p>
       </div>
 

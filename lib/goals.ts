@@ -4,6 +4,12 @@ export async function listGoalsForUser(internalUserId: string) {
   return prisma.goal.findMany({
     where: { userId: internalUserId },
     orderBy: { createdAt: "desc" },
+    include: {
+      progressEntries: {
+        orderBy: { createdAt: "desc" },
+        take: 20,
+      },
+    },
   });
 }
 
