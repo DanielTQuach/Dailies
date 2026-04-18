@@ -20,12 +20,20 @@ export default async function DashboardPage() {
           {email ? <span className="text-zinc-500"> ({email})</span> : null}
         </p>
       </div>
-      <Link
-        href="/"
-        className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
-      >
-        Back to home
-      </Link>
+      <div className="flex flex-wrap gap-4">
+        <Link
+          href="/goals"
+          className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
+        >
+          Goals
+        </Link>
+        <Link
+          href="/"
+          className="text-sm font-medium text-zinc-600 underline underline-offset-4 dark:text-zinc-400"
+        >
+          Back to home
+        </Link>
+      </div>
     </div>
   );
 }
