@@ -29,7 +29,7 @@ Environment variables are validated at startup via `lib/env.ts` using `zod`.
 
 ## Database (Prisma)
 
-Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`).
+Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`) for Next.js, and **also** put it in `.env` if you want Prisma CLI commands (`migrate`, `validate`, `generate` in some setups) to pick it up automatically—Prisma reads `.env` by default, not `.env.local`.
 
 Common commands:
 
