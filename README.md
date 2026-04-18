@@ -40,6 +40,12 @@ This app uses [Clerk](https://clerk.com/) for authentication.
 
 `middleware.ts` treats `/`, `/sign-in`, and `/sign-up` as **public**. All other matched routes (including `/dashboard`) require a signed-in user via `auth.protect()`.
 
+### Onboarding
+
+After sign-in, new users are redirected to **`/onboarding`** until they submit a display name. `app/dashboard/layout.tsx` enforces `User.onboardingCompleted` in the database.
+
+This requires **`DATABASE_URL`** (Prisma) plus Clerk keys, because onboarding persists to the `User` table via `lib/ensure-user.ts`.
+
 ## Database (Prisma)
 
 Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`) for Next.js, and **also** put it in `.env` if you want Prisma CLI commands (`migrate`, `validate`, `generate` in some setups) to pick it up automatically—Prisma reads `.env` by default, not `.env.local`.

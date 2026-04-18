@@ -10,9 +10,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  /// Clerk `userId` (`sub`). Nullable only for legacy rows before this column existed.
+  clerkUserId           String?  @unique
+  email                 String   @unique
+  name                  String?
+  onboardingCompleted   Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

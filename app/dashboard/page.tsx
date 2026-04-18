@@ -1,10 +1,13 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { ensureAppUser } from "@/lib/ensure-user";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  const user = await currentUser();
-  const email = user?.emailAddresses[0]?.emailAddress;
+  const appUser = await ensureAppUser();
+  const clerkUser = await currentUser();
+  const email =
+    clerkUser?.emailAddresses.find((e) => e.id === clerkUser?.primaryEmailAddressId)
+      ?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-8">
@@ -12,7 +15,10 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
           Dashboard
         </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">Signed in as {email ?? userId}</p>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          Signed in as {appUser?.name ?? email}
+          {email ? <span className="text-zinc-500"> ({email})</span> : null}
+        </p>
       </div>
       <Link
         href="/"
