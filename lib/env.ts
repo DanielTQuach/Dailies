@@ -9,8 +9,11 @@ const envSchema = z
     // Public values (safe to expose to the browser via NEXT_PUBLIC_*)
     NEXT_PUBLIC_APP_URL: z.string().trim().url().default("http://localhost:3000"),
 
-    // Server-only secrets / infra (optional until you wire them up)
-    DATABASE_URL: z.string().trim().min(1).optional(),
+    // Server-only: required when you import `prisma` / run migrations locally.
+    DATABASE_URL: z.preprocess(
+      (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+      z.string().trim().url().optional()
+    ),
     CLERK_SECRET_KEY: z.string().trim().min(1).optional(),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().trim().min(1).optional(),
   })

@@ -27,6 +27,21 @@ Environment variables are validated at startup via `lib/env.ts` using `zod`.
 - In **development**, `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
 - On **Vercel Production** (`VERCEL_ENV=production`), `NEXT_PUBLIC_APP_URL` must be set to your real deployed URL (not the localhost default).
 
+## Database (Prisma)
+
+Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`).
+
+Common commands:
+
+```bash
+npm run db:generate   # regenerate Prisma Client after schema changes
+npm run db:migrate    # create/apply migrations (needs DATABASE_URL)
+npm run db:push       # push schema to DB without migrations (dev only)
+npm run db:studio     # open Prisma Studio
+```
+
+Import the shared client from `lib/prisma.ts` in server code (API routes, Server Actions, `server-only` modules). `postinstall` runs `prisma generate` so CI and deploys get a generated client after `npm install`.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
