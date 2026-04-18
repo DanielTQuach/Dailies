@@ -18,6 +18,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Environment variables
+
+Copy `.env.example` to `.env.local` and fill in values as you add features.
+
+Environment variables are validated at startup via `lib/env.ts` using `zod`.
+
+- In **development**, `NEXT_PUBLIC_APP_URL` defaults to `http://localhost:3000`.
+- On **Vercel Production** (`VERCEL_ENV=production`), `NEXT_PUBLIC_APP_URL` must be set to your real deployed URL (not the localhost default).
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
