@@ -1,5 +1,6 @@
 import { Show, SignInButton, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function Home() {
   return (
@@ -28,7 +29,15 @@ export default async function Home() {
                 </SignInButton>
               </Show>
               <Show when="signed-in">
-                <UserButton />
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
+                  >
+                    Dashboard
+                  </Link>
+                  <UserButton />
+                </div>
               </Show>
             </div>
           </div>

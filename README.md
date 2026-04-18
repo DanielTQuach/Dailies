@@ -36,6 +36,10 @@ This app uses [Clerk](https://clerk.com/) for authentication.
 
 `CLERK_SECRET_KEY` and `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` are **required** at build time because `lib/env.ts` validates them.
 
+### Protected routes
+
+`middleware.ts` treats `/`, `/sign-in`, and `/sign-up` as **public**. All other matched routes (including `/dashboard`) require a signed-in user via `auth.protect()`.
+
 ## Database (Prisma)
 
 Prisma is configured for **PostgreSQL** (`prisma/schema.prisma`). This repo pins **Prisma 6** so `DATABASE_URL` stays in `schema.prisma` (Prisma 7 moved connection config). Use `DATABASE_URL` in `.env.local` (see `.env.example`) for Next.js, and **also** put it in `.env` if you want Prisma CLI commands (`migrate`, `validate`, `generate` in some setups) to pick it up automatically—Prisma reads `.env` by default, not `.env.local`.
