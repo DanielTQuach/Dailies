@@ -1,39 +1,43 @@
 import { currentUser } from "@clerk/nextjs/server";
-import Link from "next/link";
+import { EmptyState } from "@/components/dashboard/empty-state";
+import { getDashboardData } from "@/lib/dashboard-data";
 import { ensureAppUser } from "@/lib/ensure-user";
+import { DashboardClient } from "./dashboard-client";
 
 export default async function DashboardPage() {
   const appUser = await ensureAppUser();
   const clerkUser = await currentUser();
   const email =
     clerkUser?.emailAddresses.find((e) => e.id === clerkUser?.primaryEmailAddressId)
-      ?.emailAddress ?? clerkUser?.emailAddresses[0]?.emailAddress;
+      ?.emailAddress ??
+    clerkUser?.emailAddresses[0]?.emailAddress ??
+    null;
+
+  if (!appUser) {
+    return (
+      <div className="mx-auto max-w-4xl p-8">
+        <EmptyState title="Not signed in" description="Sign in to view your dashboard." />
+      </div>
+    );
+  }
+
+  let data;
+  try {
+    data = await getDashboardData(appUser.id);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    return (
+      <div className="mx-auto max-w-4xl p-8">
+        <EmptyState title="Could not load dashboard" description={message} />
+      </div>
+    );
+  }
+
+  const displayName = appUser.name ?? email ?? "there";
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Dashboard
-        </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Signed in as {appUser?.name ?? email}
-          {email ? <span className="text-zinc-500"> ({email})</span> : null}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-4">
-        <Link
-          href="/goals"
-          className="text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-50"
-        >
-          Goals
-        </Link>
-        <Link
-          href="/"
-          className="text-sm font-medium text-zinc-600 underline underline-offset-4 dark:text-zinc-400"
-        >
-          Back to home
-        </Link>
-      </div>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <DashboardClient displayName={displayName} email={email} data={data} />
     </div>
   );
 }
