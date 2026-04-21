@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export async function listProgressForGoal(userId: string, goalId: string) {
+export async function listProgressForGoal(userId: string, goalId: string, take = 100) {
   const owns = await prisma.goal.findFirst({
     where: { id: goalId, userId },
     select: { id: true },
@@ -10,7 +10,7 @@ export async function listProgressForGoal(userId: string, goalId: string) {
   return prisma.progressEntry.findMany({
     where: { goalId },
     orderBy: { createdAt: "desc" },
-    take: 100,
+    take,
   });
 }
 
