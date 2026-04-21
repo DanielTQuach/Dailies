@@ -49,20 +49,6 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
             {email ? <span className="text-zinc-500"> ({email})</span> : null}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Link
-            href="/goals"
-            className="font-medium text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-400"
-          >
-            Goals
-          </Link>
-          <Link
-            href="/"
-            className="text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-          >
-            Home
-          </Link>
-        </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
