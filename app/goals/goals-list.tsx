@@ -1,5 +1,6 @@
 import type { Goal, ProgressEntry } from "@prisma/client";
-import { deleteGoalAction, logProgressAction } from "./actions";
+import Link from "next/link";
+import { deleteGoalAction, logProgressAction, updateGoalAction } from "./actions";
 
 export type GoalWithProgress = Goal & {
   progressEntries: ProgressEntry[];
@@ -33,6 +34,14 @@ export function GoalsList({ goals }: GoalsListProps) {
                   {g.description}
                 </p>
               ) : null}
+              <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                <Link
+                  href={`/goals/${g.id}`}
+                  className="font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+                >
+                  Full timeline
+                </Link>
+              </div>
             </div>
             <form action={deleteGoalAction}>
               <input type="hidden" name="goalId" value={g.id} />
@@ -44,6 +53,42 @@ export function GoalsList({ goals }: GoalsListProps) {
               </button>
             </form>
           </div>
+
+          <details className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 dark:border-zinc-800 dark:bg-zinc-900/40">
+            <summary className="cursor-pointer text-xs font-medium text-zinc-700 dark:text-zinc-300">
+              Edit goal
+            </summary>
+            <form action={updateGoalAction} className="mt-3 flex flex-col gap-3">
+              <input type="hidden" name="goalId" value={g.id} />
+              <label className="flex flex-col gap-1 text-xs text-zinc-600 dark:text-zinc-400">
+                Title
+                <input
+                  name="title"
+                  type="text"
+                  required
+                  maxLength={120}
+                  defaultValue={g.title}
+                  className="rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-600 dark:text-zinc-400">
+                Description
+                <textarea
+                  name="description"
+                  rows={3}
+                  maxLength={2000}
+                  defaultValue={g.description ?? ""}
+                  className="resize-y rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
+                />
+              </label>
+              <button
+                type="submit"
+                className="max-w-fit rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              >
+                Save changes
+              </button>
+            </form>
+          </details>
 
           <form action={logProgressAction} className="flex flex-col gap-2 rounded-lg border border-dashed border-zinc-200 p-3 dark:border-zinc-700">
             <input type="hidden" name="goalId" value={g.id} />
