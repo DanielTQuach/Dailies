@@ -1,4 +1,5 @@
 import { createGoalAction } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export function CreateGoalForm() {
   return (
@@ -40,12 +41,11 @@ export function CreateGoalForm() {
           className="resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
         />
       </div>
-      <button
-        type="submit"
-        className="inline-flex max-w-fit items-center justify-center rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
-      >
-        Add goal
-      </button>
+      <SubmitButton
+        idleLabel="Add goal"
+        pendingLabel="Adding..."
+        className="inline-flex max-w-fit items-center justify-center rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+      />
     </form>
   );
 }

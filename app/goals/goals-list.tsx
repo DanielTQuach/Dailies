@@ -1,6 +1,7 @@
 import type { Goal, ProgressEntry } from "@prisma/client";
 import Link from "next/link";
 import { deleteGoalAction, logProgressAction, updateGoalAction } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export type GoalWithProgress = Goal & {
   progressEntries: ProgressEntry[];
@@ -45,12 +46,11 @@ export function GoalsList({ goals }: GoalsListProps) {
             </div>
             <form action={deleteGoalAction}>
               <input type="hidden" name="goalId" value={g.id} />
-              <button
-                type="submit"
-                className="text-sm font-medium text-red-600 underline-offset-2 hover:underline dark:text-red-400"
-              >
-                Delete
-              </button>
+              <SubmitButton
+                idleLabel="Delete"
+                pendingLabel="Deleting..."
+                className="text-sm font-medium text-red-600 underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-70 dark:text-red-400"
+              />
             </form>
           </div>
 
@@ -81,12 +81,11 @@ export function GoalsList({ goals }: GoalsListProps) {
                   className="resize-y rounded border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-50"
                 />
               </label>
-              <button
-                type="submit"
-                className="max-w-fit rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
-              >
-                Save changes
-              </button>
+              <SubmitButton
+                idleLabel="Save changes"
+                pendingLabel="Saving..."
+                className="max-w-fit rounded-full bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+              />
             </form>
           </details>
 
@@ -118,12 +117,11 @@ export function GoalsList({ goals }: GoalsListProps) {
                 />
               </label>
               <div className="flex items-end">
-                <button
-                  type="submit"
-                  className="rounded-full bg-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
-                >
-                  Add entry
-                </button>
+                <SubmitButton
+                  idleLabel="Add entry"
+                  pendingLabel="Adding..."
+                  className="rounded-full bg-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-300 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
+                />
               </div>
             </div>
           </form>
