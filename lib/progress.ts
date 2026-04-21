@@ -14,6 +14,38 @@ export async function listProgressForGoal(userId: string, goalId: string, take =
   });
 }
 
+export async function listProgressForGoalPage(
+  userId: string,
+  goalId: string,
+  options?: { take?: number; cursor?: string }
+) {
+  const owns = await prisma.goal.findFirst({
+    where: { id: goalId, userId },
+    select: { id: true },
+  });
+  if (!owns) return null;
+
+  const take = options?.take ?? 100;
+  const rows = await prisma.progressEntry.findMany({
+    where: { goalId },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    ...(options?.cursor
+      ? {
+          cursor: { id: options.cursor },
+          skip: 1,
+        }
+      : {}),
+    take: take + 1,
+  });
+
+  const hasMore = rows.length > take;
+  const entries = hasMore ? rows.slice(0, take) : rows;
+  return {
+    entries,
+    nextCursor: hasMore ? entries[entries.length - 1]?.id ?? null : null,
+  };
+}
+
 export async function createProgressEntryForUser(
   userId: string,
   goalId: string,

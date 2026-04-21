@@ -2,21 +2,28 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ensureAppUser } from "@/lib/ensure-user";
 import { getGoalForUser } from "@/lib/goals";
-import { listProgressForGoal } from "@/lib/progress";
+import { listProgressForGoalPage } from "@/lib/progress";
 
 type PageProps = {
   params: Promise<{ goalId: string }>;
+  searchParams?: Promise<{ cursor?: string }>;
 };
 
-export default async function GoalTimelinePage({ params }: PageProps) {
+export default async function GoalTimelinePage({ params, searchParams }: PageProps) {
   const { goalId } = await params;
+  const query = searchParams ? await searchParams : undefined;
   const user = await ensureAppUser();
   if (!user) redirect("/sign-in");
 
   const goal = await getGoalForUser(user.id, goalId);
   if (!goal) notFound();
 
-  const entries = (await listProgressForGoal(user.id, goalId, 500)) ?? [];
+  const result = await listProgressForGoalPage(user.id, goalId, {
+    take: 100,
+    cursor: query?.cursor,
+  });
+  if (!result) notFound();
+  const { entries, nextCursor } = result;
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 p-8">
@@ -42,7 +49,7 @@ export default async function GoalTimelinePage({ params }: PageProps) {
           <p className="text-sm text-zinc-500 dark:text-zinc-500">No description.</p>
         )}
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Showing up to {entries.length} most recent progress entries.
+          Showing {entries.length} entries per page.
         </p>
       </div>
 
@@ -66,6 +73,16 @@ export default async function GoalTimelinePage({ params }: PageProps) {
           ))}
         </ul>
       )}
+      {nextCursor ? (
+        <div className="flex justify-end">
+          <Link
+            href={`/goals/${goalId}?cursor=${encodeURIComponent(nextCursor)}`}
+            className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            Load older entries
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
