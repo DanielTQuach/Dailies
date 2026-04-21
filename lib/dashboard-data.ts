@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { computeStreakUtc, computeWeeklyMomentum, uniqueUtcDayKeys } from "@/lib/streak-stats";
 
 export type HeatmapRowSerializable = {
   date: string;
@@ -17,26 +18,6 @@ export type DashboardPayload = {
   heatmapRows: HeatmapRowSerializable[];
   goalsForSelect: { id: string; title: string }[];
 };
-
-function utcDayKey(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
-
-function computeStreakUtc(daysWithActivity: Set<string>) {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  let streak = 0;
-  for (let i = 0; i < 120; i++) {
-    const key = utcDayKey(d);
-    if (daysWithActivity.has(key)) {
-      streak += 1;
-    } else if (streak > 0) {
-      break;
-    }
-    d.setUTCDate(d.getUTCDate() - 1);
-  }
-  return streak;
-}
 
 export async function getDashboardData(internalUserId: string): Promise<DashboardPayload> {
   const now = new Date();
@@ -96,10 +77,10 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     }),
   ]);
 
-  const daysWithActivity = new Set(entries7dKeys.map((e) => utcDayKey(e.createdAt)));
-  const weeklyMomentum = daysWithActivity.size / 7;
+  const daysWithActivity = uniqueUtcDayKeys(entries7dKeys.map((e) => e.createdAt));
+  const weeklyMomentum = computeWeeklyMomentum(daysWithActivity.size, 7);
 
-  const streakDays = new Set(entriesYear.map((e) => utcDayKey(e.createdAt)));
+  const streakDays = uniqueUtcDayKeys(entriesYear.map((e) => e.createdAt));
   const megaStreak = computeStreakUtc(streakDays);
 
   const heatmapRows: HeatmapRowSerializable[] = heatmapEntries.map((e) => ({
