@@ -11,8 +11,11 @@ export type HeatmapRowSerializable = {
 export type DashboardPayload = {
   goalCount: number;
   entriesLast7d: number;
+  entriesLast30d: number;
   totalProgressPoints: number;
   weeklyMomentum: number;
+  monthlyMomentum: number;
+  momentumDelta: number;
   megaStreak: number;
   nextAction: string;
   heatmapRows: HeatmapRowSerializable[];
@@ -25,16 +28,20 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
   weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);
   const ninetyAgo = new Date(now);
   ninetyAgo.setUTCDate(ninetyAgo.getUTCDate() - 90);
+  const monthAgo = new Date(now);
+  monthAgo.setUTCDate(monthAgo.getUTCDate() - 30);
   const yearAgo = new Date(now);
   yearAgo.setUTCDate(yearAgo.getUTCDate() - 365);
 
   const [
     goalCount,
     entriesLast7d,
+    entriesLast30d,
     heatmapEntries,
     sumAgg,
     goalsForSelect,
     entries7dKeys,
+    entries30dKeys,
     entriesYear,
   ] = await Promise.all([
     prisma.goal.count({ where: { userId: internalUserId } }),
@@ -42,6 +49,12 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
       where: {
         goal: { userId: internalUserId },
         createdAt: { gte: weekAgo },
+      },
+    }),
+    prisma.progressEntry.count({
+      where: {
+        goal: { userId: internalUserId },
+        createdAt: { gte: monthAgo },
       },
     }),
     prisma.progressEntry.findMany({
@@ -71,6 +84,13 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     prisma.progressEntry.findMany({
       where: {
         goal: { userId: internalUserId },
+        createdAt: { gte: monthAgo },
+      },
+      select: { createdAt: true },
+    }),
+    prisma.progressEntry.findMany({
+      where: {
+        goal: { userId: internalUserId },
         createdAt: { gte: yearAgo },
       },
       select: { createdAt: true },
@@ -79,6 +99,9 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
 
   const daysWithActivity = uniqueUtcDayKeys(entries7dKeys.map((e) => e.createdAt));
   const weeklyMomentum = computeWeeklyMomentum(daysWithActivity.size, 7);
+  const monthDaysWithActivity = uniqueUtcDayKeys(entries30dKeys.map((e) => e.createdAt));
+  const monthlyMomentum = computeWeeklyMomentum(monthDaysWithActivity.size, 30);
+  const momentumDelta = weeklyMomentum - monthlyMomentum;
 
   const streakDays = uniqueUtcDayKeys(entriesYear.map((e) => e.createdAt));
   const megaStreak = computeStreakUtc(streakDays);
@@ -102,8 +125,11 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
   return {
     goalCount,
     entriesLast7d,
+    entriesLast30d,
     totalProgressPoints,
     weeklyMomentum,
+    monthlyMomentum,
+    momentumDelta,
     megaStreak,
     nextAction,
     heatmapRows,

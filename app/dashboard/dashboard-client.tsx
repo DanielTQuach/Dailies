@@ -105,6 +105,27 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
         </button>
       </div>
 
+      <div className="grid gap-3 md:grid-cols-3">
+        <KpiCard
+          title="Entries (30d)"
+          hint="Recent monthly volume"
+          value={data.entriesLast30d}
+          sub="Includes last 30 UTC days"
+        />
+        <KpiCard
+          title="Monthly momentum"
+          hint="Share of active days in last 30"
+          value={`${Math.round(data.monthlyMomentum * 100)}%`}
+          sub="Longer-window consistency"
+        />
+        <KpiCard
+          title="Trend vs monthly"
+          hint="7-day minus 30-day momentum"
+          value={`${data.momentumDelta >= 0 ? "+" : ""}${Math.round(data.momentumDelta * 100)}pp`}
+          sub={data.momentumDelta >= 0 ? "Pacing above monthly baseline" : "Pacing below monthly baseline"}
+        />
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-zinc-200 bg-white shadow-sm lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
