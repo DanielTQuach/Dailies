@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import type { DashboardPayload } from "@/lib/dashboard-data";
 import { quickLogProgress } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 type DashboardClientProps = {
   displayName: string;
@@ -198,12 +199,11 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
                     className="w-full rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="rounded-md border border-zinc-300 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
-                >
-                  Log today
-                </button>
+                <SubmitButton
+                  idleLabel="Log today"
+                  pendingLabel="Logging..."
+                  className="rounded-md border border-zinc-300 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                />
               </form>
             )}
           </div>
