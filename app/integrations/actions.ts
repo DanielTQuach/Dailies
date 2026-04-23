@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { ensureAppUser } from "@/lib/ensure-user";
 import { syncGithubForUser } from "@/lib/github-sync";
+import { syncLeetCodeForUser } from "@/lib/leetcode-sync";
 import { prisma } from "@/lib/prisma";
 import { githubAdapter } from "@/lib/providers/github";
+import { leetcodePlaceholderAdapter } from "@/lib/providers/leetcode-placeholder";
 
 export type GithubConnectState = {
   error?: string;
@@ -86,6 +88,73 @@ export async function syncGithubAction(
 
   try {
     const result = await syncGithubForUser(user.id);
+    revalidatePath("/integrations");
+    revalidatePath("/dashboard");
+    return { ok: true, daysBackfilled: result.daysBackfilled, events: result.events };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Sync failed" };
+  }
+}
+
+export type LeetCodeConnectState = {
+  error?: string;
+  ok?: boolean;
+};
+
+export async function connectLeetCodeAction(
+  _prev: LeetCodeConnectState | null,
+  formData: FormData
+): Promise<LeetCodeConnectState> {
+  void _prev;
+  const user = await ensureAppUser();
+  if (!user) return { error: "You must be signed in." };
+
+  const username = String(formData.get("leetcodeUsername") ?? "").trim();
+  if (!username) {
+    return { error: "LeetCode username is required." };
+  }
+
+  await prisma.providerAccount.upsert({
+    where: { userId_provider: { userId: user.id, provider: "LEETCODE" } },
+    create: {
+      userId: user.id,
+      provider: "LEETCODE",
+      externalId: username,
+      connectionStatus: "connected",
+      dataSourceType: leetcodePlaceholderAdapter.defaultDataSource,
+      confidenceLevel: leetcodePlaceholderAdapter.defaultConfidence,
+      lastSyncedAt: null,
+    },
+    update: {
+      externalId: username,
+      connectionStatus: "connected",
+      dataSourceType: leetcodePlaceholderAdapter.defaultDataSource,
+      confidenceLevel: leetcodePlaceholderAdapter.defaultConfidence,
+    },
+  });
+
+  revalidatePath("/integrations");
+  return { ok: true };
+}
+
+export type LeetCodeSyncState = {
+  error?: string;
+  ok?: boolean;
+  daysBackfilled?: number;
+  events?: number;
+};
+
+export async function syncLeetCodeAction(
+  _prev: LeetCodeSyncState | null,
+  _formData: FormData
+): Promise<LeetCodeSyncState> {
+  void _prev;
+  void _formData;
+  const user = await ensureAppUser();
+  if (!user) return { error: "You must be signed in." };
+
+  try {
+    const result = await syncLeetCodeForUser(user.id);
     revalidatePath("/integrations");
     revalidatePath("/dashboard");
     return { ok: true, daysBackfilled: result.daysBackfilled, events: result.events };

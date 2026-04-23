@@ -105,7 +105,7 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     prisma.dailyActivity.findMany({
       where: {
         userId: internalUserId,
-        provider: { in: ["GITHUB", "MANUAL"] },
+        provider: { in: ["GITHUB", "LEETCODE", "MANUAL"] },
         date: { gte: yearAgo },
       },
       select: { date: true, points: true, completed: true, provider: true },
@@ -150,7 +150,8 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     .filter((g) => g.completed || g.points > 0)
     .map((g) => ({
       date: new Date(g.date).toISOString(),
-      provider: g.provider === "GITHUB" ? "GitHub" : "Manual",
+      provider:
+        g.provider === "GITHUB" ? "GitHub" : g.provider === "LEETCODE" ? "LeetCode" : "Manual",
       points: g.points,
       completed: g.completed,
     }));

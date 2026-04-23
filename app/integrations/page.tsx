@@ -2,13 +2,9 @@ import { redirect } from "next/navigation";
 import { ensureAppUser } from "@/lib/ensure-user";
 import { prisma } from "@/lib/prisma";
 import { GithubIntegrationRow } from "./github-integration-row";
+import { LeetCodeIntegrationRow } from "./leetcode-integration-row";
 
 const OTHER_ROWS: { key: string; label: string; detail: string }[] = [
-  {
-    key: "LEETCODE",
-    label: "LeetCode",
-    detail: "Connect your LeetCode profile.",
-  },
   {
     key: "NEETCODE",
     label: "NeetCode",
@@ -30,6 +26,16 @@ export default async function IntegrationsPage() {
       completed: true,
     },
   });
+  const leetcode = await prisma.providerAccount.findUnique({
+    where: { userId_provider: { userId: user.id, provider: "LEETCODE" } },
+  });
+  const leetcodeCompletedDays = await prisma.dailyActivity.count({
+    where: {
+      userId: user.id,
+      provider: "LEETCODE",
+      completed: true,
+    },
+  });
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -47,6 +53,12 @@ export default async function IntegrationsPage() {
               connectionStatus={github?.connectionStatus ?? "disconnected"}
               lastSyncedAt={github?.lastSyncedAt?.toISOString() ?? null}
               completedDays={githubCompletedDays}
+            />
+            <LeetCodeIntegrationRow
+              externalId={leetcode?.externalId ?? null}
+              connectionStatus={leetcode?.connectionStatus ?? "disconnected"}
+              lastSyncedAt={leetcode?.lastSyncedAt?.toISOString() ?? null}
+              completedDays={leetcodeCompletedDays}
             />
             {OTHER_ROWS.map((row) => (
               <tr key={row.key} className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
