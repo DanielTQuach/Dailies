@@ -36,7 +36,7 @@ export default async function DashboardPage() {
   const displayName = appUser.name ?? email ?? "there";
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
       <DashboardClient displayName={displayName} email={email} data={data} />
     </div>
   );

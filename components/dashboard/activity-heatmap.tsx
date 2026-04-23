@@ -102,7 +102,7 @@ export function ActivityHeatmap({ rows }: { rows: HeatmapRowSerializable[] }) {
   );
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1fr_260px]">
+    <div className="grid gap-4 2xl:grid-cols-[1fr_260px]">
       <div>
         <p className="mb-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
           Last 14 weeks · click a day for details

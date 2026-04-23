@@ -20,11 +20,9 @@ export type DashboardPayload = {
   nextAction: string;
   heatmapRows: HeatmapRowSerializable[];
   goalsForSelect: { id: string; title: string }[];
-  /** GitHub integration summary for the signed-in user (optional UI). */
   github: {
     username: string | null;
     lastSyncedAt: string | null;
-    /** Distinct UTC days in the last ~90d with a completed GitHub daily row. */
     completedDaysLast90: number;
   };
 };
@@ -50,7 +48,7 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     entries7dKeys,
     entries30dKeys,
     entriesYear,
-    githubDailyYear,
+    providerDailyYear,
     githubAccount,
   ] = await Promise.all([
     prisma.goal.count({ where: { userId: internalUserId } }),
@@ -107,10 +105,10 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     prisma.dailyActivity.findMany({
       where: {
         userId: internalUserId,
-        provider: "GITHUB",
+        provider: { in: ["GITHUB", "MANUAL"] },
         date: { gte: yearAgo },
       },
-      select: { date: true, points: true, completed: true },
+      select: { date: true, points: true, completed: true, provider: true },
     }),
     prisma.providerAccount.findUnique({
       where: { userId_provider: { userId: internalUserId, provider: "GITHUB" } },
@@ -124,7 +122,7 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
 
   const daysWithActivity = uniqueUtcDayKeys(entries7dKeys.map((e) => e.createdAt));
   const monthDaysWithActivity = uniqueUtcDayKeys(entries30dKeys.map((e) => e.createdAt));
-  for (const g of githubDailyYear) {
+  for (const g of providerDailyYear) {
     if (!g.completed) continue;
     const k = utcDayKey(new Date(g.date));
     if (k >= weekAgoDay) daysWithActivity.add(k);
@@ -135,7 +133,7 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
   const momentumDelta = weeklyMomentum - monthlyMomentum;
 
   const streakDays = uniqueUtcDayKeys(entriesYear.map((e) => e.createdAt));
-  for (const g of githubDailyYear) {
+  for (const g of providerDailyYear) {
     if (!g.completed) continue;
     streakDays.add(utcDayKey(new Date(g.date)));
   }
@@ -147,20 +145,20 @@ export async function getDashboardData(internalUserId: string): Promise<Dashboar
     points: e.amount,
     completed: true,
   }));
-  const githubHeatmap: HeatmapRowSerializable[] = githubDailyYear
+  const providerHeatmap: HeatmapRowSerializable[] = providerDailyYear
     .filter((g) => utcDayKey(new Date(g.date)) >= ninetyAgoDay)
     .filter((g) => g.completed || g.points > 0)
     .map((g) => ({
       date: new Date(g.date).toISOString(),
-      provider: "GitHub",
+      provider: g.provider === "GITHUB" ? "GitHub" : "Manual",
       points: g.points,
       completed: g.completed,
     }));
-  const heatmapRows: HeatmapRowSerializable[] = [...progressHeatmap, ...githubHeatmap];
+  const heatmapRows: HeatmapRowSerializable[] = [...progressHeatmap, ...providerHeatmap];
 
   const githubCompletedDaysLast90 = new Set(
-    githubDailyYear
-      .filter((g) => g.completed && utcDayKey(new Date(g.date)) >= ninetyAgoDay)
+    providerDailyYear
+      .filter((g) => g.provider === "GITHUB" && g.completed && utcDayKey(new Date(g.date)) >= ninetyAgoDay)
       .map((g) => utcDayKey(new Date(g.date)))
   ).size;
 

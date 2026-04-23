@@ -6,7 +6,7 @@ import { ActivityHeatmap } from "@/components/dashboard/activity-heatmap";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import type { DashboardPayload } from "@/lib/dashboard-data";
-import { quickLogProgress } from "./actions";
+import { quickLogManualActivity, quickLogProgress } from "./actions";
 import { SubmitButton } from "./submit-button";
 
 type DashboardClientProps = {
@@ -113,8 +113,8 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm lg:col-span-2 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="grid items-start gap-4 xl:grid-cols-12">
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm xl:col-span-8 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Activity</h2>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
@@ -133,22 +133,26 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
           </div>
         </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="rounded-xl border border-zinc-200 bg-white shadow-sm xl:col-span-4 dark:border-zinc-800 dark:bg-zinc-950">
           <div className="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Quick log</h2>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              +1 progress point on a chosen goal
+              Log goal progress or manual activity for today
             </p>
           </div>
           <div className="p-4">
-            {data.goalsForSelect.length === 0 ? (
-              <EmptyState
-                title="Create a goal first"
-                description="You need at least one goal before quick logging from the dashboard."
-                className="py-6"
-              />
-            ) : (
+            <div className="space-y-4">
               <form className="space-y-3" action={quickLogProgress}>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Goal activity
+                </p>
+                {data.goalsForSelect.length === 0 ? (
+                  <EmptyState
+                    title="Create a goal first"
+                    description="You need at least one goal to use goal quick log."
+                    className="py-3"
+                  />
+                ) : null}
                 <div className="space-y-1.5">
                   <label
                     htmlFor="goalId"
@@ -159,7 +163,8 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
                   <select
                     id="goalId"
                     name="goalId"
-                    required
+                    required={data.goalsForSelect.length > 0}
+                    disabled={data.goalsForSelect.length === 0}
                     className="w-full rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
                     defaultValue={data.goalsForSelect[0]?.id}
                   >
@@ -185,13 +190,62 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
                     className="w-full rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
                   />
                 </div>
+                {data.goalsForSelect.length > 0 ? (
+                  <SubmitButton
+                    idleLabel="Log today"
+                    pendingLabel="Logging..."
+                    className="rounded-md border border-zinc-300 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
+                  />
+                ) : null}
+              </form>
+
+              <form className="space-y-3 border-t border-zinc-200 pt-4 dark:border-zinc-800" action={quickLogManualActivity}>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  Manual activity
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="manualPoints"
+                      className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                    >
+                      Points
+                    </label>
+                    <input
+                      id="manualPoints"
+                      name="manualPoints"
+                      type="number"
+                      min={0.1}
+                      max={5}
+                      step={0.1}
+                      defaultValue={1}
+                      className="w-full rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="manualNote"
+                      className="text-xs font-medium text-zinc-700 dark:text-zinc-300"
+                    >
+                      Note (optional)
+                    </label>
+                    <input
+                      id="manualNote"
+                      name="manualNote"
+                      type="text"
+                      maxLength={200}
+                      placeholder="What did you work on?"
+                      className="w-full rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+                    />
+                  </div>
+                </div>
                 <SubmitButton
-                  idleLabel="Log today"
+                  idleLabel="Log manual activity"
                   pendingLabel="Logging..."
                   className="rounded-md border border-zinc-300 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:border-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
                 />
               </form>
-            )}
+            </div>
           </div>
         </div>
       </div>
