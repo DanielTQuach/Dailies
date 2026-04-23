@@ -1,9 +1,9 @@
-const ROWS: { key: string; label: string; detail: string }[] = [
-  {
-    key: "GITHUB",
-    label: "GitHub",
-    detail: "Sync coding activity from your GitHub account.",
-  },
+import { redirect } from "next/navigation";
+import { ensureAppUser } from "@/lib/ensure-user";
+import { prisma } from "@/lib/prisma";
+import { GithubIntegrationRow } from "./github-integration-row";
+
+const OTHER_ROWS: { key: string; label: string; detail: string }[] = [
   {
     key: "LEETCODE",
     label: "LeetCode",
@@ -16,7 +16,21 @@ const ROWS: { key: string; label: string; detail: string }[] = [
   },
 ];
 
-export default function IntegrationsPage() {
+export default async function IntegrationsPage() {
+  const user = await ensureAppUser();
+  if (!user) redirect("/sign-in");
+
+  const github = await prisma.providerAccount.findUnique({
+    where: { userId_provider: { userId: user.id, provider: "GITHUB" } },
+  });
+  const githubCompletedDays = await prisma.dailyActivity.count({
+    where: {
+      userId: user.id,
+      provider: "GITHUB",
+      completed: true,
+    },
+  });
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
@@ -29,7 +43,13 @@ export default function IntegrationsPage() {
             </tr>
           </thead>
           <tbody>
-            {ROWS.map((row) => (
+            <GithubIntegrationRow
+              externalId={github?.externalId ?? null}
+              connectionStatus={github?.connectionStatus ?? "disconnected"}
+              lastSyncedAt={github?.lastSyncedAt?.toISOString() ?? null}
+              completedDays={githubCompletedDays}
+            />
+            {OTHER_ROWS.map((row) => (
               <tr key={row.key} className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
                 <td className="p-2.5 align-top">
                   <p className="font-medium text-zinc-900 dark:text-zinc-50">{row.label}</p>

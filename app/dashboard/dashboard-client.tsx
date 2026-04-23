@@ -56,7 +56,7 @@ export function DashboardClient({ displayName, email, data }: DashboardClientPro
           title="Streak"
           hint="Consecutive days with progress (UTC)"
           value={data.megaStreak}
-          sub="Based on your progress log"
+          sub="Goal logs + synced GitHub days"
         />
         <KpiCard
           title="Weekly momentum"

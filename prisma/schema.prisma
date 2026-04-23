@@ -9,6 +9,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ProviderKey {
+  GITHUB
+  LEETCODE
+  NEETCODE
+  GENERIC_CUSTOM
+  COMPETITIVE_PROGRAMMING
+  MANUAL
+}
+
+enum DataSourceType {
+  OFFICIAL_API
+  OAUTH
+  PUBLIC_PROFILE
+  SCRAPE
+  USER_UPLOAD
+  MANUAL
+}
+
+enum SyncJobStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
 model User {
   id                    String   @id @default(cuid())
   /// Clerk `userId` (`sub`). Nullable only for legacy rows before this column existed.
@@ -19,6 +45,64 @@ model User {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   goals                 Goal[]
+  providerAccounts      ProviderAccount[]
+  dailyActivities       DailyActivity[]
+  providerSyncJobs      ProviderSyncJob[]
+}
+
+model ProviderAccount {
+  id                 String          @id @default(cuid())
+  userId             String
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider           ProviderKey
+  externalId         String?
+  displayName        String?
+  accessToken        String?
+  refreshToken       String?
+  connectionStatus   String          @default("disconnected")
+  dataSourceType     DataSourceType  @default(MANUAL)
+  syncCadenceMinutes Int?            @default(360)
+  confidenceLevel    Float           @default(0.8)
+  lastSyncedAt       DateTime?
+  metadata             Json?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+}
+
+model ProviderSyncJob {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   ProviderKey
+  jobType    String
+  status     SyncJobStatus   @default(PENDING)
+  payload    Json?
+  result     Json?
+  error      String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime        @default(now())
+
+  @@index([userId, status])
+}
+
+model DailyActivity {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime      @db.Date
+  provider  ProviderKey
+  points    Float         @default(0)
+  completed Boolean       @default(false)
+  meta      Json?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([userId, date, provider])
+  @@index([userId, date])
 }
 
 model Goal {
