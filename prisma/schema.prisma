@@ -35,16 +35,6 @@ enum SyncJobStatus {
   CANCELLED
 }
 
-enum JobStage {
-  SAVED
-  APPLIED
-  OA
-  PHONE
-  ONSITE
-  OFFER
-  REJECTED
-}
-
 model User {
   id                    String   @id @default(cuid())
   /// Clerk `userId` (`sub`). Nullable only for legacy rows before this column existed.
@@ -58,24 +48,6 @@ model User {
   providerAccounts      ProviderAccount[]
   dailyActivities       DailyActivity[]
   providerSyncJobs      ProviderSyncJob[]
-  jobApplications       JobApplication[]
-}
-
-model JobApplication {
-  id                 String    @id @default(cuid())
-  userId             String
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName        String
-  roleTitle          String?
-  stage              JobStage  @default(SAVED)
-  applyUrl           String?
-  jobDescriptionUrl  String?
-  notes              String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-
-  @@index([userId])
-  @@index([userId, stage])
 }
 
 model ProviderAccount {
