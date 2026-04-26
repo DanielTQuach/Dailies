@@ -1,10 +1,12 @@
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { redirect } from "next/navigation";
+import { ensureAppUser } from "@/lib/ensure-user";
+import { listJobApplicationsForUser } from "@/lib/jobs";
+import { JobsClient } from "./jobs-client";
 
-export default function JobsPage() {
-  return (
-    <PlaceholderPage
-      title="Job Tracker"
-      description="The shell is in place. Next we can add pipeline stages, application cards, and status updates."
-    />
-  );
+export default async function JobsPage() {
+  const user = await ensureAppUser();
+  if (!user) redirect("/sign-in");
+
+  const jobs = await listJobApplicationsForUser(user.id);
+  return <JobsClient jobs={jobs} />;
 }
